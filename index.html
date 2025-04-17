@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$TP - Toilet Paper Coin | Decentralized Meme Currency</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #121212;
+            --secondary: #2a2a2a;
+            --accent: #4a4a4a;
+            --highlight: #7a7a7a;
+            --text: #e0e0e0;
+            --solana: #9945FF;
+            --ethereum: #627EEA;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pixelify Sans', sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+            height: 100vh;
+            position: relative;
+            background: url('bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        
+        /* Dark overlay for better readability */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 3fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 15px;
+            min-height: 100vh;
+        }
+        
+        header {
+            grid-column: 1 / 4;
+            text-align: center;
+            padding: 15px;
+            background: rgba(18, 18, 18, 0.8);
+            border: 1px solid var(--highlight);
+            backdrop-filter: blur(5px);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--text);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: var(--highlight);
+            font-weight: 400;
+        }
+        
+        .social-links {
+            grid-column: 1;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: 1px solid var(--highlight);
+            background: rgba(42, 42, 42, 0.8);
+            font-family: 'Pixelify Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .btn:hover {
+            background: rgba(74, 74, 74, 0.8);
+            transform: translateX(3px);
+        }
+        
+        .btn:active {
+            transform: translateX(3px) translateY(1px);
+        }
+        
+        .btn-twitter {
+            border-left: 3px solid #1DA1F2;
+        }
+        
+        .btn-telegram {
+            border-left: 3px solid #0088CC;
+        }
+        
+        .btn-buy {
+            border-left: 3px solid var(--highlight);
+            font-size: 1rem;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .btn-solana {
+            border-left: 3px solid var(--solana);
+        }
+        
+        .btn-ethereum {
+            border-left: 3px solid var(--ethereum);
+        }
+        
+        .game-area {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--highlight);
+            background: rgba(42, 42, 42, 0.8);
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .toilet-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .toilet {
+            width: 100%;
+            height: 100%;
+            background: url('toilet.png') no-repeat center center;
+            background-size: contain;
+            position: relative;
+            filter: grayscale(30%) contrast(120%);
+        }
+        
+        .flush-btn {
+            position: absolute;
+            right: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 80px;
+            background: url('flush.png') no-repeat center center;
+            background-size: cover;
+            border: 3px solid var(--highlight);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            filter: grayscale(50%) contrast(120%);
+        }
+        
+        .flush-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            filter: grayscale(30%) contrast(130%);
+        }
+        
+        .flush-btn:active {
+            transform: translateY(-48%) scale(0.98);
+        }
+        
+        .flush-btn.disabled {
+            filter: grayscale(80%) brightness(0.5);
+            cursor: not-allowed;
+        }
+        
+        .water {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 0;
+            background: rgba(100, 100, 255, 0.3);
+            transition: height 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .flush-animation {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 0;
+            background: rgba(100, 100, 255, 0.3);
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            animation: bubbleUp 1s ease-out forwards;
+        }
+        
+        @keyframes bubbleUp {
+            0% { transform: translateY(0) scale(0.3); opacity: 1; }
+            100% { transform: translateY(-150px) scale(1); opacity: 0; }
+        }
+        
+        .coins {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, #7a7a7a, #4a4a4a);
+            animation: coinFall 1s ease-in forwards;
+            z-index: 5;
+        }
+        
+        @keyframes coinFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+        }
+        
+        .game-rules {
+            background: rgba(74, 74, 74, 0.8);
+            padding: 15px;
+            border: 1px solid var(--highlight);
+            margin-top: 20px;
+            width: 100%;
+            backdrop-filter: blur(5px);
+        }
+        
+        .game-rules h2 {
+            color: var(--text);
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .game-rules ul {
+            list-style-type: none;
+        }
+        
+        .game-rules li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .game-rules li::before {
+            content: '■';
+            position: absolute;
+            left: 0;
+            color: var(--highlight);
+        }
+        
+        .leaderboard {
+            grid-column: 3;
+            grid-row: 2;
+            background: rgba(42, 42, 42, 0.8);
+            padding: 15px;
+            border: 1px solid var(--highlight);
+            max-height: 70vh;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+        
+        .leaderboard h2 {
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .leaderboard ol {
+            list-style-type: none;
+            counter-reset: leaderboard-counter;
+        }
+        
+        .leaderboard li {
+            counter-increment: leaderboard-counter;
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            background: rgba(74, 74, 74, 0.6);
+            border: 1px solid var(--highlight);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+        
+        .leaderboard li:hover {
+            background: rgba(18, 18, 18, 0.8);
+        }
+        
+        .leaderboard li::before {
+            content: counter(leaderboard-counter);
+            font-weight: bold;
+            color: var(--highlight);
+            margin-right: 8px;
+        }
+        
+        .leaderboard .wallet {
+            font-family: monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+        
+        .leaderboard .score {
+            font-weight: bold;
+            color: var(--text);
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        
+        .leaderboard .chain {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-left: 5px;
+        }
+        
+        .leaderboard .chain.ethereum {
+            background: var(--ethereum);
+        }
+        
+        .leaderboard .chain.solana {
+            background: var(--solana);
+        }
+        
+        .wallet-input {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .wallet-input input {
+            padding: 8px;
+            background: rgba(74, 74, 74, 0.8);
+            border: 1px solid var(--highlight);
+            color: var(--text);
+            font-family: monospace;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .wallet-input .chain-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .wallet-input button {
+            padding: 8px;
+            background: rgba(122, 122, 122, 0.8);
+            border: 1px solid var(--text);
+            color: var(--text);
+            font-family: 'Pixelify Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .wallet-input button:hover {
+            background: rgba(224, 224, 224, 0.8);
+            color: var(--primary);
+        }
+        
+        .timer {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(74, 74, 74, 0.8);
+            color: var(--text);
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            border: 1px solid var(--highlight);
+            backdrop-filter: blur(5px);
+        }
+        
+        .flush-count {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(74, 74, 74, 0.8);
+            color: var(--text);
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            border: 1px solid var(--highlight);
+            backdrop-filter: blur(5px);
+        }
+        
+        .flush-count span {
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        .confetti {
+            position: fixed;
+            background-color: var(--highlight);
+            opacity: 0;
+            z-index: 9999;
+            animation: confettiFall 5s linear forwards;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+            
+            header, .social-links, .game-area, .leaderboard {
+                grid-column: 1;
+            }
+            
+            .social-links {
+                grid-row: 2;
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .game-area {
+                grid-row: 3;
+            }
+            
+            .leaderboard {
+                grid-row: 4;
+                max-height: 300px;
+            }
+            
+            .flush-btn {
+                position: relative;
+                right: auto;
+                top: auto;
+                transform: none;
+                margin: 15px 0;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .toilet-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .flush-btn {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>$TP COIN</h1>
+            <p class="subtitle">DECENTRALIZED MEME CURRENCY</p>
+        </header>
+        
+        <div class="social-links">
+            <a href="https://x.com/Tp_coin_" target="_blank" rel="noopener noreferrer" class="btn btn-twitter">
+                <i class="fab fa-twitter"></i> Twitter
+            </a>
+            <a href="https://t.me/toiletpapercoinn" target="_blank" rel="noopener noreferrer" class="btn btn-telegram">
+                <i class="fab fa-telegram"></i> Telegram
+            </a>
+            <a href="https://pump.fun/profile/8LdeGmBAxdYDzhWqf4YEMW116d7Afv4DqNMuNyKVQae8" target="_blank" rel="noopener noreferrer" class="btn btn-buy">
+                <i class="fas fa-toilet-paper"></i> BUY $TP
+            </a>
+        </div>
+        
+        <div class="game-area">
+            <div class="flush-count">FLUSHES: <span id="flushCounter">0</span></div>
+            <div class="timer" id="timer">30</div>
+            
+            <div class="toilet-container">
+                <div class="toilet">
+                    <div class="water" id="water"></div>
+                    <div class="flush-animation" id="flushAnimation"></div>
+                </div>
+                <button class="flush-btn" id="flushBtn"></button>
+            </div>
+            
+            <div class="game-rules">
+                <h2>GAME MECHANICS</h2>
+                <ul>
+                    <li>Press FLUSH to earn $TP tokens</li>
+                    <li>Each flush gives you airdrop points</li>
+                    <li>More flushes = Bigger airdrop</li>
+                    <li>Insert your wallet address below</li>
+                    <li>30 second cooldown between flushes</li>
+                    <li>Top 10 flushers get bonus rewards</li>
+                    <li>Milestone rewards at 100/500/1000</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>TOP FLUSHERS</h2>
+            <ol id="leaderboardList">
+                <li>
+                    <span class="wallet">5vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R</span>
+                    <span class="chain solana" title="Solana"></span>
+                    <span class="score">2</span>
+                </li>
+                <li>
+                    <span class="wallet">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</span>
+                    <span class="chain ethereum" title="Ethereum"></span>
+                    <span class="score">1</span>
+                </li>
+                <li>
+                    <span class="wallet">GvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y</span>
+                    <span class="chain solana" title="Solana"></span>
+                    <span class="score">1</span>
+                </li>
+                <li>
+                    <span class="wallet">0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B</span>
+                    <span class="chain ethereum" title="Ethereum"></span>
+                    <span class="score">1</span>
+                </li>
+                <li>
+                    <span class="wallet">9vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R</span>
+                    <span class="chain solana" title="Solana"></span>
+                    <span class="score">109</span>
+                </li>
+            </ol>
+            
+            <div class="wallet-input">
+                <div class="chain-selector">
+                    <button class="btn btn-solana chain-btn" data-chain="solana">SOL</button>
+                </div>
+                <input type="text" id="walletAddress" placeholder="Enter ETH wallet (0x...)" />
+                <button id="submitWallet">JOIN LEADERBOARD</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flushBtn = document.getElementById('flushBtn');
+            const water = document.getElementById('water');
+            const flushAnimation = document.getElementById('flushAnimation');
+            const timer = document.getElementById('timer');
+            const flushCounter = document.getElementById('flushCounter');
+            const leaderboardList = document.getElementById('leaderboardList');
+            const walletInput = document.getElementById('walletAddress');
+            const submitWallet = document.getElementById('submitWallet');
+            const chainBtns = document.querySelectorAll('.chain-btn');
+            
+            let count = 0;
+            let timeLeft = 30;
+            let canFlush = true;
+            let userWallet = '';
+            let userChain = 'ethereum';
+            let leaderboard = [
+                { wallet: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', score: 1024, chain: 'ethereum' },
+                { wallet: '5vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 987, chain: 'solana' },
+                { wallet: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', score: 876, chain: 'ethereum' },
+                { wallet: 'GvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y', score: 765, chain: 'solana' },
+                { wallet: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B', score: 654, chain: 'ethereum' },
+                { wallet: '7vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 543, chain: 'solana' },
+                { wallet: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', score: 432, chain: 'ethereum' },
+                { wallet: 'HvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y', score: 321, chain: 'solana' },
+                { wallet: '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5', score: 210, chain: 'ethereum' },
+                { wallet: '9vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 109, chain: 'solana' }
+            ];
+            
+            // Chain selection
+            chainBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    chainBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    userChain = this.dataset.chain;
+                    
+                    if (userChain === 'ethereum') {
+                        walletInput.placeholder = "Enter ETH wallet (0x...)";
+                    } else {
+                        walletInput.placeholder = "Enter SOL wallet";
+                    }
+                });
+            });
+            
+            // Update leaderboard display
+            function updateLeaderboard() {
+                leaderboardList.innerHTML = '';
+                leaderboard.sort((a, b) => b.score - a.score);
+                
+                leaderboard.slice(0, 10).forEach((entry, index) => {
+                    const li = document.createElement('li');
+                    const walletSpan = document.createElement('span');
+                    walletSpan.className = 'wallet';
+                    walletSpan.textContent = entry.wallet;
+                    
+                    const chainSpan = document.createElement('span');
+                    chainSpan.className = `chain ${entry.chain}`;
+                    chainSpan.title = entry.chain === 'ethereum' ? 'Ethereum' : 'Solana';
+                    
+                    const scoreSpan = document.createElement('span');
+                    scoreSpan.className = 'score';
+                    scoreSpan.textContent = entry.score.toLocaleString();
+                    
+                    li.appendChild(walletSpan);
+                    li.appendChild(chainSpan);
+                    li.appendChild(scoreSpan);
+                    leaderboardList.appendChild(li);
+                });
+            }
+            
+            // Initial leaderboard update
+            updateLeaderboard();
+            
+            // Timer countdown
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timer.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    canFlush = true;
+                    flushBtn.classList.remove('disabled');
+                    timeLeft = 30;
+                }
+            }, 1000);
+            
+            // Flush button click handler
+            flushBtn.addEventListener('click', function() {
+                if (!canFlush || !userWallet) return;
+                
+                canFlush = false;
+                flushBtn.classList.add('disabled');
+                count++;
+                flushCounter.textContent = count;
+                
+                // Water animation
+                water.style.height = '80px';
+                setTimeout(() => {
+                    water.style.height = '0';
+                }, 300);
+                
+                // Flush animation
+                createFlushAnimation();
+                
+                // Add coins to user's score
+                const userEntry = leaderboard.find(entry => entry.wallet === userWallet);
+                if (userEntry) {
+                    userEntry.score += 1;
+                } else {
+                    leaderboard.push({ wallet: userWallet, score: 1, chain: userChain });
+                }
+                updateLeaderboard();
+                
+                // Check for milestone flushes
+                checkMilestones(userEntry ? userEntry.score : 1);
+            });
+            
+            // Check for milestone flushes and celebrate
+            function checkMilestones(score) {
+                const milestones = [100, 500, 1000];
+                if (milestones.includes(score)) {
+                    createConfetti();
+                    setTimeout(() => {
+                        alert(`MILESTONE REACHED: ${score} FLUSHES\nREWARD WILL BE SENT TO YOUR WALLET`);
+                    }, 1000);
+                }
+            }
+            
+            // Create confetti celebration
+            function createConfetti() {
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    // Random position
+                    const left = Math.random() * 100;
+                    confetti.style.left = `${left}vw`;
+                    
+                    // Random size
+                    const size = Math.random() * 6 + 3;
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    
+                    // Random color
+                    const colors = ['#7a7a7a', '#4a4a4a', '#2a2a2a', '#9945FF', '#627EEA'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.backgroundColor = color;
+                    
+                    // Random delay
+                    confetti.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }
+            }
+            
+            // Create flush animation with bubbles and coins
+            function createFlushAnimation() {
+                flushAnimation.style.height = '80px';
+                
+                // Create bubbles
+                for (let i = 0; i < 10; i++) {
+                    createBubble();
+                }
+                
+                // Create coins
+                for (let i = 0; i < 3; i++) {
+                    createCoin();
+                }
+                
+                setTimeout(() => {
+                    flushAnimation.style.height = '0';
+                }, 800);
+            }
+            
+            function createBubble() {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                
+                // Random size between 3 and 10px
+                const size = Math.random() * 7 + 3;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Random position
+                const left = Math.random() * 80 + 10;
+                bubble.style.left = `${left}%`;
+                
+                // Random delay
+                bubble.style.animationDelay = `${Math.random() * 0.3}s`;
+                
+                flushAnimation.appendChild(bubble);
+                
+                // Remove bubble after animation
+                setTimeout(() => {
+                    bubble.remove();
+                }, 800);
+            }
+            
+            function createCoin() {
+                const coin = document.createElement('div');
+                coin.className = 'coins';
+                
+                // Random size between 8 and 15px
+                const size = Math.random() * 7 + 8;
+                coin.style.width = `${size}px`;
+                coin.style.height = `${size}px`;
+                
+                // Random position
+                const left = Math.random() * 80 + 10;
+                coin.style.left = `${left}%`;
+                
+                // Random delay
+                coin.style.animationDelay = `${Math.random() * 0.3}s`;
+                
+                flushAnimation.appendChild(coin);
+                
+                // Remove coin after animation
+                setTimeout(() => {
+                    coin.remove();
+                }, 800);
+            }
+            
+            // Wallet submission
+            submitWallet.addEventListener('click', function() {
+                const wallet = walletInput.value.trim();
+                let isValid = false;
+                
+                if (userChain === 'ethereum') {
+                    // Basic Ethereum address validation
+                    isValid = wallet.startsWith('0x') && wallet.length === 42;
+                } else {
+                    // Basic Solana address validation
+                    isValid = wallet.length >= 32 && wallet.length <= 44;
+                }
+                
+                if (isValid) {
+                    userWallet = wallet;
+                    alert(`WALLET REGISTERED: ${wallet.substring(0, 6)}...${wallet.substring(wallet.length - 4)}`);
+                    
+                    // Add user to leaderboard if not already there
+                    const exists = leaderboard.some(entry => entry.wallet === wallet);
+                    if (!exists) {
+                        leaderboard.push({ wallet, score: 0, chain: userChain });
+                        updateLeaderboard();
+                    }
+                } else {
+                    alert(`INVALID ${userChain === 'ethereum' ? 'ETHEREUM' : 'SOLANA'} WALLET ADDRESS`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
