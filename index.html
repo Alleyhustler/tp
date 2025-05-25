@@ -438,6 +438,81 @@
                 opacity: 0;
             }
         }
+
+        /* Custom popup styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background: rgba(42, 42, 42, 0.95);
+            border: 2px solid var(--highlight);
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(5px);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.active .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .popup-message {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .popup-button {
+            padding: 8px 20px;
+            background: var(--solana);
+            border: none;
+            color: white;
+            font-family: 'Pixelify Sans', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .popup-button:hover {
+            background: #7a3dcc;
+        }
         
         @media (max-width: 1000px) {
             .container {
@@ -568,11 +643,24 @@
             
             <div class="wallet-input">
                 <div class="chain-selector">
-                    <button class="btn btn-solana chain-btn" data-chain="solana">SOL</button>
+                    <button class="btn btn-solana chain-btn active" data-chain="solana">SOL</button>
                 </div>
-                <input type="text" id="walletAddress" placeholder="Enter ETH wallet (0x...)" />
+                <input type="text" id="walletAddress" placeholder="Enter SOL wallet" />
                 <button id="submitWallet">JOIN LEADERBOARD</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Popup overlay -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <button class="popup-close" id="popupClose">&times;</button>
+            <h3 class="popup-title" id="popupTitle">FLUSH SUCCESSFUL!</h3>
+            <div class="popup-message" id="popupMessage">
+                You've earned 1 $TP token!<br>
+                Keep flushing to earn more rewards.
+            </div>
+            <button class="popup-button" id="popupButton">OK</button>
         </div>
     </div>
     
@@ -591,23 +679,51 @@
             const submitWallet = document.getElementById('submitWallet');
             const chainBtns = document.querySelectorAll('.chain-btn');
             
+            // Popup elements
+            const popupOverlay = document.getElementById('popupOverlay');
+            const popupClose = document.getElementById('popupClose');
+            const popupButton = document.getElementById('popupButton');
+            const popupTitle = document.getElementById('popupTitle');
+            const popupMessage = document.getElementById('popupMessage');
+            
             let count = 0;
             let timeLeft = 30;
             let canFlush = true;
             let userWallet = '';
-            let userChain = 'ethereum';
+            let userChain = 'solana'; // Default to Solana
             let leaderboard = [
-                { wallet: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', score: 1024, chain: 'ethereum' },
-                { wallet: '5vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 987, chain: 'solana' },
-                { wallet: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', score: 876, chain: 'ethereum' },
-                { wallet: 'GvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y', score: 765, chain: 'solana' },
-                { wallet: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B', score: 654, chain: 'ethereum' },
-                { wallet: '7vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 543, chain: 'solana' },
-                { wallet: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', score: 432, chain: 'ethereum' },
-                { wallet: 'HvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y', score: 321, chain: 'solana' },
-                { wallet: '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5', score: 210, chain: 'ethereum' },
-                { wallet: '9vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 109, chain: 'solana' }
+                { wallet: '5vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 1024, chain: 'solana' },
+                { wallet: 'GvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y', score: 987, chain: 'solana' },
+                { wallet: '7vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 876, chain: 'solana' },
+                { wallet: 'HvQ1Q2Z3L4H5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y', score: 765, chain: 'solana' },
+                { wallet: '9vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 654, chain: 'solana' },
+                { wallet: '3vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 543, chain: 'solana' },
+                { wallet: '2vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 432, chain: 'solana' },
+                { wallet: '1vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 321, chain: 'solana' },
+                { wallet: '8vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 210, chain: 'solana' },
+                { wallet: '6vJRzVw8a4jSUeZ9v1d1BZqF6RyqKP5mFQqE3YK1qj5R', score: 109, chain: 'solana' }
             ];
+            
+            // Show popup function
+            function showPopup(title, message) {
+                popupTitle.textContent = title;
+                popupMessage.innerHTML = message;
+                popupOverlay.classList.add('active');
+            }
+            
+            // Hide popup function
+            function hidePopup() {
+                popupOverlay.classList.remove('active');
+            }
+            
+            // Close popup when clicking close button or overlay
+            popupClose.addEventListener('click', hidePopup);
+            popupButton.addEventListener('click', hidePopup);
+            popupOverlay.addEventListener('click', function(e) {
+                if (e.target === popupOverlay) {
+                    hidePopup();
+                }
+            });
             
             // Chain selection
             chainBtns.forEach(btn => {
@@ -623,6 +739,9 @@
                     }
                 });
             });
+            
+            // Set Solana as default active
+            document.querySelector('.btn-solana').classList.add('active');
             
             // Update leaderboard display
             function updateLeaderboard() {
@@ -667,7 +786,15 @@
             
             // Flush button click handler
             flushBtn.addEventListener('click', function() {
-                if (!canFlush || !userWallet) return;
+                if (!canFlush) {
+                    showPopup('COOLDOWN ACTIVE', 'Please wait for the timer to reset before flushing again.');
+                    return;
+                }
+                
+                if (!userWallet) {
+                    showPopup('WALLET REQUIRED', 'Please enter your Solana wallet address to start flushing and earning $TP tokens!');
+                    return;
+                }
                 
                 canFlush = false;
                 flushBtn.classList.add('disabled');
@@ -692,6 +819,9 @@
                 }
                 updateLeaderboard();
                 
+                // Show flush success popup
+                showPopup('FLUSH SUCCESSFUL!', `You've earned 1 $TP token!<br>Total flushes: ${count}`);
+                
                 // Check for milestone flushes
                 checkMilestones(userEntry ? userEntry.score : 1);
             });
@@ -702,7 +832,7 @@
                 if (milestones.includes(score)) {
                     createConfetti();
                     setTimeout(() => {
-                        alert(`MILESTONE REACHED: ${score} FLUSHES\nREWARD WILL BE SENT TO YOUR WALLET`);
+                        showPopup('MILESTONE REACHED!', `Congratulations! You've reached ${score} flushes!<br>A reward will be sent to your wallet.`);
                     }, 1000);
                 }
             }
@@ -821,7 +951,7 @@
                 
                 if (isValid) {
                     userWallet = wallet;
-                    alert(`WALLET REGISTERED: ${wallet.substring(0, 6)}...${wallet.substring(wallet.length - 4)}`);
+                    showPopup('WALLET REGISTERED', `Your ${userChain === 'ethereum' ? 'Ethereum' : 'Solana'} wallet has been registered:<br><strong>${wallet.substring(0, 6)}...${wallet.substring(wallet.length - 4)}</strong>`);
                     
                     // Add user to leaderboard if not already there
                     const exists = leaderboard.some(entry => entry.wallet === wallet);
@@ -830,7 +960,7 @@
                         updateLeaderboard();
                     }
                 } else {
-                    alert(`INVALID ${userChain === 'ethereum' ? 'ETHEREUM' : 'SOLANA'} WALLET ADDRESS`);
+                    showPopup('INVALID WALLET', `Please enter a valid ${userChain === 'ethereum' ? 'Ethereum (0x...)' : 'Solana'} wallet address.`);
                 }
             });
         });
